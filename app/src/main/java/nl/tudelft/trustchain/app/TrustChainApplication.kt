@@ -61,6 +61,8 @@ import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
+import nl.tudelft.trustchain.common.upvotetoken.UpvoteGatewayStore
+import nl.tudelft.trustchain.common.upvotetoken.UpvoteTransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
@@ -152,6 +154,12 @@ class TrustChainApplication : Application() {
         tr.initTrustChainCommunity() // register eurotoken listeners
         val euroTokenCommunity = ipv8.getOverlay<EuroTokenCommunity>()!!
         euroTokenCommunity.setTransactionRepository(tr)
+
+        val tr2 = UpvoteTransactionRepository(trustchain, UpvoteGatewayStore.getInstance(this))
+        tr2.initTrustChainCommunity() // register upvote listeners
+
+        val upvoteTokenCommunity = ipv8.getOverlay<UpvoteCommunity>()!!
+        upvoteTokenCommunity.setTransactionRepository(tr2)
 
         WalletService.createGlobalWallet(this.cacheDir ?: throw Error("CacheDir not found"))
 
@@ -451,8 +459,12 @@ class TrustChainApplication : Application() {
 
     private fun createUpvoteCommunity(): OverlayConfiguration<UpvoteCommunity> {
         val randomWalk = RandomWalk.Factory()
+        val settings = TrustChainSettings()
+        val upvoteDriver = AndroidSqliteDriver(Database.Schema, this, "upvotetoken.db")
+        val store = TrustChainSQLiteStore(Database(upvoteDriver))
+
         return OverlayConfiguration(
-            UpvoteCommunity.Factory(),
+            UpvoteCommunity.Factory(settings,store),
             listOf(randomWalk)
         )
     }

@@ -1,21 +1,34 @@
 package nl.tudelft.trustchain.detoks.community
 
-import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import mu.KotlinLogging
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainCrawler
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.trustchain.common.upvotetoken.UpvoteTransactionRepository
 
 private val logger = KotlinLogging.logger {}
 
-class UpvoteCommunity() : Community(){
-    /**
-     * serviceId is a randomly generated hex string with length 40
-     */
+class UpvoteCommunity(
+    settings: TrustChainSettings,
+    database: TrustChainStore,
+    crawler: TrustChainCrawler = TrustChainCrawler()
+) : TrustChainCommunity(settings, database, crawler) {
     override val serviceId = "ee6ce7b5ad81eef11f4fcff335229ba169c03aeb"
+
+    private lateinit var upvoteTransactionRepository: UpvoteTransactionRepository
 
     init {
         messageHandlers[MessageID.HEART_TOKEN] = ::onHeartTokenPacket
+    }
+
+    @JvmName("setTransactionRepository1")
+    fun setTransactionRepository(upvoteTransactionRepositoryLocal: UpvoteTransactionRepository) {
+        upvoteTransactionRepository = upvoteTransactionRepositoryLocal
     }
 
     object MessageID {
@@ -46,30 +59,49 @@ class UpvoteCommunity() : Community(){
      * Sends a HeartToken to a random Peer
      */
     fun sendHeartToken(id: String, token: String): String {
-        val payload = HeartTokenPayload(id, token)
-
-        val packet = serializePacket(
-            MessageID.HEART_TOKEN,
-            payload
-        )
-
         val peer = pickRandomPeer()
+        val receiverPublicKey = peer?.publicKey.toString()
+        val amount = 1L
 
-        if (peer != null) {
-            val message = "You/Peer with member id: ${myPeer.mid} is sending a heart token to peer with peer id: ${peer.mid}"
-            logger.debug { message }
-            send(peer, packet)
-            return message
+        logger.debug { "Reveicer key is $receiverPublicKey" }
+        //val key = defaultCryptoProvider.keyFromPublicBin(receiverPublicKey.hexToBytes())
+        val balance = upvoteTransactionRepository.getMyBalance();
+
+        logger.debug { "Balance before upvote $balance" }
+        logger.debug { "Balance before upvote $balance" }
+
+        val succes = upvoteTransactionRepository.sendTransferProposal(receiverPublicKey.hexToBytes(), amount)
+
+
+        if (succes) {
+            val payload = HeartTokenPayload(id, token)
+
+            val packet = serializePacket(
+                MessageID.HEART_TOKEN,
+                payload
+            )
+
+            if (peer != null) {
+                val message = "You/Peer with member id: ${myPeer.mid} is sending a heart token to peer with peer id: ${peer.mid}"
+                logger.debug { message }
+                send(peer, packet)
+                return message
+            }
         }
+
+
+
 
         return "No peer found"
     }
 
     class Factory(
-        // add parameters needed by the constructor of UpvoteCommunity if needed
+        private val settings: TrustChainSettings,
+        private val database: TrustChainStore,
+        private val crawler: TrustChainCrawler = TrustChainCrawler()
     ) : Overlay.Factory<UpvoteCommunity>(UpvoteCommunity::class.java) {
         override fun create(): UpvoteCommunity {
-            return UpvoteCommunity()
+            return UpvoteCommunity(settings, database, crawler)
         }
     }
 }
