@@ -1,0 +1,24 @@
+CREATE TABLE upvotegateways (
+    name TEXT NOT NULL,
+    public_key BLOB NOT NULL,
+    ip TEXT NOT NULL,
+    port INTEGER NOT NULL,
+    preferred INTEGER NOT NULL,
+    PRIMARY KEY (public_key)
+);
+
+addGateway:
+REPLACE INTO upvotegateways (name, public_key, ip, port, preferred)
+VALUES(?, ?, ?, ?, ?);
+
+getGateway:
+SELECT * FROM upvotegateways WHERE public_key = ?;
+
+getAll:
+SELECT * FROM upvotegateways;
+
+deleteGateway:
+DELETE FROM upvotegateways WHERE public_key = ?;
+
+getPreffered:
+SELECT * FROM upvotegateways WHERE preferred = 1;

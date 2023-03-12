@@ -63,7 +63,7 @@ class UpvoteCommunity(
         val receiverPublicKey = peer?.publicKey.toString()
         val amount = 1L
 
-        logger.debug { "Reveicer key is $receiverPublicKey" }
+        logger.debug { "Receiver key is $receiverPublicKey" }
         //val key = defaultCryptoProvider.keyFromPublicBin(receiverPublicKey.hexToBytes())
         val balance = upvoteTransactionRepository.getMyBalance();
 
@@ -88,9 +88,6 @@ class UpvoteCommunity(
                 return message
             }
         }
-
-
-
 
         return "No peer found"
     }
