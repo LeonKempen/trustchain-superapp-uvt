@@ -8,11 +8,13 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.trustchain.common.upvotetoken.blocks.UpvoteTokenBaseValidator
 import java.math.BigInteger
 
-class UpvoteTransactionRepository(
+class UpvoteTransactionRepository (
     val trustChainCommunity: TrustChainCommunity,
-    val upvoteGatewayStore: UpvoteGatewayStore
+    val upvoteGatewayStore: UpvoteGatewayStore,
+    val upvoteValidator: UpvoteTokenBaseValidator
 ) {
     private val scope = CoroutineScope(Dispatchers.IO)
 
@@ -150,12 +152,11 @@ class UpvoteTransactionRepository(
 
     fun sendTransferProposalSync(recipient: ByteArray, amount: Long): TrustChainBlock? {
         val transaction = mapOf(
-            nl.tudelft.trustchain.common.eurotoken.TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(amount),
-            nl.tudelft.trustchain.common.eurotoken.TransactionRepository.KEY_BALANCE to (BigInteger.valueOf(getMyBalance() - amount).toLong())
+            KEY_AMOUNT to BigInteger.valueOf(amount),
+            KEY_BALANCE to (BigInteger.valueOf(getMyBalance() - amount).toLong())
         )
         return trustChainCommunity.createProposalBlock(
-            nl.tudelft.trustchain.common.eurotoken.TransactionRepository.BLOCK_TYPE_TRANSFER, transaction,
-            recipient
+            BLOCK_TYPE_TRANSFER, transaction, recipient
         )
     }
 

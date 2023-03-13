@@ -1,14 +1,17 @@
 package nl.tudelft.trustchain.common.upvotetoken.blocks
 
+import mu.KotlinLogging
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.eurotoken.blocks.EuroTokenBaseValidator
+import nl.tudelft.trustchain.common.upvotetoken.UpvoteTransactionRepository
 
-@OptIn(ExperimentalUnsignedTypes::class)
-open class UpvoteTokenBaseValidator(val transactionRepository: TransactionRepository) :
+private val logger = KotlinLogging.logger {}
+
+class UpvoteTokenBaseValidator :
     TransactionValidator {
 
     private fun getBlockBeforeOrRaise(block: TrustChainBlock, database: TrustChainStore): TrustChainBlock? {
@@ -21,6 +24,7 @@ open class UpvoteTokenBaseValidator(val transactionRepository: TransactionReposi
     }
 
     override fun validate(block: TrustChainBlock, database: TrustChainStore): ValidationResult {
+            logger.debug("Entered validation")
 //        try {
 //            validateUpvoteToken(block, database)
 //        } catch (e: EuroTokenBaseValidator.Invalid) {
