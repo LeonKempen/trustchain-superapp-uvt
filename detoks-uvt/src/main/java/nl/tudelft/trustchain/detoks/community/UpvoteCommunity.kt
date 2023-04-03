@@ -23,6 +23,7 @@ import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
 import nl.tudelft.trustchain.detoks.trustchain.blocks.SeedRewardBlock
 import nl.tudelft.trustchain.detoks.util.CommunityConstants
+import java.lang.Integer.min
 
 
 private val logger = KotlinLogging.logger {}
@@ -44,14 +45,15 @@ class UpvoteCommunity(
     init {
         messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
         messageHandlers[MessageID.MAGNET_URI_AND_HASH] = ::onMagnetURIPacket
-        this.registerBlockSigner(UpvoteTrustchainConstants.BALANCE_CHECKPOINT, object : BlockSigner {
+        this.registerBlockSigner(CommunityConstants.BALANCE_CHECKPOINT, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
                 this@UpvoteCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
             }
         })
         messageHandlers[MessageID.RECOMMENDATION_REQUEST] = ::onRecommendationRequestPacket
         messageHandlers[MessageID.RECOMMENDATION_RECEIVED] = ::onRecommendationReceivedPacket
-
+        messageHandlers[MessageID.UPVOTE_VIDEO] = ::onUpvoteVideoPacket
+        messageHandlers[MessageID.SEED_REWARD] = ::onSeedRewardPacket
     }
 
     object MessageID {
@@ -70,7 +72,7 @@ class UpvoteCommunity(
     fun getContentToSeed() {
         // randomly select peers
         // if a random set is not good, we can change that
-        val listOfPostsAndUpvotes = database.getBlocksWithType(UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN)
+        val listOfPostsAndUpvotes = database.getBlocksWithType(CommunityConstants.GIVE_UPVOTE_TOKEN)
         val otherPeersProposalBlocks = listOfPostsAndUpvotes.filter { it.isProposal
             && it.publicKey.toHex() != myPeer.publicKey.keyToBin().toHex()
             && !seedVideoIDs.contains(it.blockId)
@@ -128,18 +130,6 @@ class UpvoteCommunity(
     private fun onUpvoteVideoPacket(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(UpvoteVideoPayload.Deserializer)
         onUpvoteVideo(peer, payload)
-    }
-
-
-    private fun onMagnetURIPacket(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(MagnetURIPayload.Deserializer)
-        onMagnetURI(peer, payload)
-    }
-
-    private fun onMagnetURI(peer: Peer, payload: MagnetURIPayload) {
-        Log.i("Detoks", "[MAGNETURIPAYLOAD] -> received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}")
-        logger.debug { "[MAGNETURIPAYLOAD] -> received magnet payload with uri: ${payload.magnet_uri} and hash: ${payload.proposal_token_hash} from peer with member id: ${peer.mid}" }
-        torrentManager?.addTorrent(payload.magnet_uri)
     }
 
     private fun onUpvoteToken(peer: Peer, payload: UpvoteTokenPayload) {

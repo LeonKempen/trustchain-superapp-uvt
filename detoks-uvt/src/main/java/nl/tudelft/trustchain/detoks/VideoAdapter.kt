@@ -83,7 +83,7 @@ class VideosAdapter(
             tokensReceived = itemView.findViewById(R.id.tokensReceivedValue)
             tokensBalance = itemView.findViewById(R.id.tokensBalanceValue)
 
-            upvoteToken.setLikeListener(itemView, videoID, proposalBlockHash)
+
             proposalToken.setPostVideoListener(proposalSendButton, itemView, torrentManager)
             balance.checkTokenBalance(tokensSent, tokensReceived, tokensBalance)
             balance.dailyBalanceCheckpoint(tokensSent, tokensReceived, tokensBalance)
@@ -94,6 +94,7 @@ class VideosAdapter(
                 Log.i("Detoks", "My peer id is: ${upvoteCommunity.myPeer.mid}")
                 Log.i("Detoks", "My peer public key is: ${upvoteCommunity.myPeer.publicKey.keyToBin().toHex()}")
                 upvoteCommunity.getContentToSeed()
+                upvoteToken.setLikeListener(itemView, videoID.text.toString(), proposalBlockHash, upvoteCommunity.myPeer.publicKey.keyToBin().toHex())
             }
             // TODO: remove this, for testing of Recommender only
             recommendMostLikedButton.setOnClickListener { Recommender.recommendMostLiked() }
