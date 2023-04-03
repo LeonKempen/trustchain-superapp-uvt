@@ -52,10 +52,10 @@ class UpvoteToken constructor(
             val newToken: UpvoteToken
             // Check if a new sequence should be started
             if (lastUpvoteToken == null || DateFormatter.stringToDate(lastUpvoteToken.date).before(today)) {
-                newToken = UpvoteToken(0, DateFormatter.todayAsString(), publicKey, videoID)
+                newToken = UpvoteToken(0, DateFormatter.todayAsString(), publicKey, videoID, publicKeySeeder)
             } else if (lastUpvoteToken.tokenID > -1 && lastUpvoteToken.tokenID < 9) {
                 val nextId = lastUpvoteToken.tokenID + 1
-                newToken = UpvoteToken(nextId, DateFormatter.todayAsString(), publicKey, videoID)
+                newToken = UpvoteToken(nextId, DateFormatter.todayAsString(), publicKey, videoID, publicKeySeeder)
             } else {
                 throw InvalidMintException("Mint limit exceeded")
             }

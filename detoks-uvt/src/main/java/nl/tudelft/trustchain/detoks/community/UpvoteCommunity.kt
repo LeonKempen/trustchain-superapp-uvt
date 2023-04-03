@@ -35,21 +35,24 @@ class UpvoteCommunity(
      * serviceId is a randomly generated hex string with length 40
      */
     override val serviceId = "ee6ce7b5ad81eef11f4fcff335229ba169c03aeb"
+    var torrentManager: TorrentManager? = null
 
     init {
-        messageHandlers[CommunityConstants.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
-        messageHandlers[CommunityConstants.MAGNET_URI_AND_HASH] = ::onMagnetURIPacket
-        messageHandlers[CommunityConstants.UPVOTE_VIDEO] = ::onUpvoteVideoPacket
-        messageHandlers[CommunityConstants.SEED_REWARD] = ::onSeedRewardPacket
+        messageHandlers[MessageID.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
+        messageHandlers[MessageID.MAGNET_URI_AND_HASH] = ::onMagnetURIPacket
+        messageHandlers[MessageID.UPVOTE_VIDEO] = ::onUpvoteVideoPacket
+        messageHandlers[MessageID.SEED_REWARD] = ::onSeedRewardPacket
         messageHandlers[MessageID.RECOMMENDATION_REQUEST] = ::onRecommendationRequestPacket
         messageHandlers[MessageID.RECOMMENDATION_RECEIVED] = ::onRecommendationReceivedPacket
-
     }
 
     object MessageID {
         const val UPVOTE_TOKEN = 1
         const val RECOMMENDATION_REQUEST = 2
         const val RECOMMENDATION_RECEIVED = 3
+        const val MAGNET_URI_AND_HASH = 4
+        const val UPVOTE_VIDEO = 5
+        const val SEED_REWARD = 6
     }
 
     private fun onUpvoteTokenPacket(packet: Packet) {
@@ -221,7 +224,7 @@ class UpvoteCommunity(
         )
 
         val packet = serializePacket(
-            CommunityConstants.MAGNET_URI_AND_HASH,
+            MessageID.MAGNET_URI_AND_HASH,
             payload
         )
 
@@ -248,7 +251,7 @@ class UpvoteCommunity(
     fun sendUpvoteToken(upvoteTokens: List<UpvoteToken>): Boolean {
         val payload = UpvoteVideoPayload(upvoteTokens)
         val packet = serializePacket(
-            CommunityConstants.UPVOTE_VIDEO,
+            MessageID.UPVOTE_VIDEO,
             payload
         )
 
@@ -257,7 +260,6 @@ class UpvoteCommunity(
         if (peer != null) {
             val message = "[DETOKS] You/Peer with member id: ${myPeer.mid} is sending a upvote token to peer with peer id: ${peer.mid}"
             logger.debug { message }
-            logger.debug { "[DETOKS] Upvoted video with id ${upvoteToken.videoID}" }
             send(peer, packet)
             return true
         }
@@ -282,7 +284,7 @@ class UpvoteCommunity(
         val rewardBlockHash = rewardBlock.calculateHash()
         val payload = SeedRewardPayload(rewardBlockHash, upvoteTokens)
         val packet = serializePacket(
-            CommunityConstants.SEED_REWARD,
+            MessageID.SEED_REWARD,
             payload
         )
 
