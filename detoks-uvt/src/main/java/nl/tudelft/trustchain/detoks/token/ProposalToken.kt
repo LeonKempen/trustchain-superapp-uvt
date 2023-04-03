@@ -10,6 +10,10 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
+import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
+import nl.tudelft.trustchain.detoks.helpers.DateFormatter
+import java.time.LocalDateTime
+import java.util.*
 import nl.tudelft.trustchain.detoks.util.CommunityConstants
 
 class ProposalToken {
@@ -26,8 +30,10 @@ class ProposalToken {
         val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
         val myPeer = IPv8Android.getInstance().myPeer
 
+        val videoIDTimestamp = DateFormatter.localTimeToGMTDate(Date().time)
+        val ownPublicKeyString = myPeer.publicKey.toString()
         val transaction = mapOf(
-            "videoID" to "TODO: REPLACE THIS WITH ACTUAL VIDEO ID",
+            "videoID" to "$ownPublicKeyString $videoIDTimestamp TODO: REPLACE THIS WITH ACTUAL VIDEO ID",
             "heartTokenGivenBy" to ANY_COUNTERPARTY_PK.toHex(),
             "heartTokenGivenTo" to myPeer.publicKey.keyToBin().toHex()
         )
@@ -47,7 +53,6 @@ class ProposalToken {
     fun setPostVideoListener(proposalSendButton: Button, itemView: View, torrentManager: TorrentManager) {
         proposalSendButton.setOnClickListener{
             val proposalBlock = createProposalToken()
-            val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
             val hash = proposalBlock?.calculateHash()!!
             val myPeer = IPv8Android.getInstance().myPeer
             val message = "Button Clicked! Your public key: " +
@@ -56,19 +61,7 @@ class ProposalToken {
                 "The hash of this block is ${hash.toHex()}, corresponding hashCode is: ${hash.hashCode()} \n" +
                 "the block Id of this proposal block is: ${proposalBlock.blockId} \n" +
                 "the linked block id is: ${proposalBlock.linkedBlockId}\n"
-            // torrentManager.addNewVideo(hash.toHex(), proposalBlock.timestamp.toString(), proposalBlock.blockId)
-            val torrentInfo = torrentManager.getSeedableTorrents().get(0)
-            val magnetURI = torrentManager.seedTorrent(torrentInfo)
-
-            if (magnetURI == null) {
-                Log.i("DeToks", "Seeding failed!")
-            } else {
-                Log.i("DeToks", "Seeding succeeded!")
-            }
-
-            if (magnetURI != null) {
-                upvoteCommunity?.sendVideoData(magnetURI, hash.toHex())
-            }
+            torrentManager.addNewVideo(hash.toHex(), proposalBlock.timestamp.toString(), proposalBlock.blockId)
 
             Log.i("DeToks", message)
             Toast.makeText(

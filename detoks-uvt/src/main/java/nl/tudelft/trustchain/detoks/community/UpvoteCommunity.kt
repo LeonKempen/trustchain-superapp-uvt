@@ -13,7 +13,10 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.detoks.TorrentManager
 import nl.tudelft.trustchain.detoks.db.OwnedTokenManager
+import nl.tudelft.trustchain.detoks.db.SentTokenManager
 import nl.tudelft.trustchain.detoks.exception.PeerNotFoundException
+import nl.tudelft.trustchain.detoks.recommendation.RecommendationType
+import nl.tudelft.trustchain.detoks.recommendation.Recommender
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.token.UpvoteTokenValidator
 import nl.tudelft.trustchain.detoks.trustchain.blocks.SeedRewardBlock
@@ -32,18 +35,38 @@ class UpvoteCommunity(
      * serviceId is a randomly generated hex string with length 40
      */
     override val serviceId = "ee6ce7b5ad81eef11f4fcff335229ba169c03aeb"
-    var torrentManager: TorrentManager? = null
 
     init {
         messageHandlers[CommunityConstants.UPVOTE_TOKEN] = ::onUpvoteTokenPacket
         messageHandlers[CommunityConstants.MAGNET_URI_AND_HASH] = ::onMagnetURIPacket
         messageHandlers[CommunityConstants.UPVOTE_VIDEO] = ::onUpvoteVideoPacket
         messageHandlers[CommunityConstants.SEED_REWARD] = ::onSeedRewardPacket
+        messageHandlers[MessageID.RECOMMENDATION_REQUEST] = ::onRecommendationRequestPacket
+        messageHandlers[MessageID.RECOMMENDATION_RECEIVED] = ::onRecommendationReceivedPacket
+
+    }
+
+    object MessageID {
+        const val UPVOTE_TOKEN = 1
+        const val RECOMMENDATION_REQUEST = 2
+        const val RECOMMENDATION_RECEIVED = 3
     }
 
     private fun onUpvoteTokenPacket(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(UpvoteTokenPayload.Deserializer)
         onUpvoteToken(peer, payload)
+    }
+
+    private fun onRecommendationRequestPacket(packet: Packet) {
+        val (peer, _) = packet.getAuthPayload(RecommendedVideosPayload.Deserializer)
+        sendLastUpvotedVideos(peer)
+    }
+
+    private fun onRecommendationReceivedPacket(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(RecommendedVideosPayload.Deserializer)
+        logger.debug { "[DETOKS] -> Received recommendations of ${peer.mid}" }
+        val recommendations = payload.recommendations
+        Recommender.addRecommendations(recommendations, RecommendationType.PEERS)
     }
 
     private fun onSeedRewardPacket(packet: Packet) {
@@ -71,7 +94,7 @@ class UpvoteCommunity(
     private fun onUpvoteToken(peer: Peer, payload: UpvoteTokenPayload) {
         OwnedTokenManager(context).createOwnedUpvoteTokensTable()
         // do something with the payload
-        logger.debug { "[DETOKS] -> received upvote token with id: ${payload.token_id} from peer with member id: ${peer.mid}" }
+        logger.debug { "[UPVOTETOKEN] -> received upvote token with id: ${payload.token_id} from peer with member id: ${peer.mid}" }
         val upvoteToken = UpvoteToken(
             payload.token_id.toInt(),
             payload.date,
@@ -90,6 +113,29 @@ class UpvoteCommunity(
             logger.debug { "[UPVOTETOKEN] Oh no! Received invalid token!" }
         }
 
+        sendOwnLastVideos(peer)
+
+    }
+
+    fun requestRecommendations() {
+        var receivers = getPeers()
+        if (receivers.isEmpty())
+            return
+        val subset = receivers.size
+
+        logger.debug { "[DETOKS] Requesting recomendations of ${subset} peers" }
+
+        receivers = receivers.asSequence().shuffled().take(subset).toList()
+
+        val payload = RecommendedVideosPayload(emptyList())
+
+        val packet = serializePacket(
+            MessageID.RECOMMENDATION_REQUEST,
+            payload
+        )
+
+        for (receiver in receivers)
+            send(receiver, packet)
     }
 
     private fun onUpvoteVideo(peer: Peer, payload: UpvoteVideoPayload) {
@@ -195,10 +241,9 @@ class UpvoteCommunity(
     }
 
     /**
-     * Sends a UpvoteToken to a random Peer
-     * When a message is sent, a proposal block is created
+    * When a message is sent, a proposal block is created
      * //TODO: only make an agreement block if the user did not like the video yet, if the user already like the video,
-     * Sends a UpvoteToken to a random Peer
+     * Sends an UpvoteToken to a random Peer
      */
     fun sendUpvoteToken(upvoteTokens: List<UpvoteToken>): Boolean {
         val payload = UpvoteVideoPayload(upvoteTokens)
@@ -207,11 +252,12 @@ class UpvoteCommunity(
             payload
         )
 
-        val peer = pickRandomPeer()
+        var peer = pickRandomPeer()
 
         if (peer != null) {
-            val message = "[UPVOTETOKEN] You/Peer with member id: ${myPeer.mid} is sending a upvote token to peer with peer id: ${peer.mid}"
+            val message = "[DETOKS] You/Peer with member id: ${myPeer.mid} is sending a upvote token to peer with peer id: ${peer.mid}"
             logger.debug { message }
+            logger.debug { "[DETOKS] Upvoted video with id ${upvoteToken.videoID}" }
             send(peer, packet)
             return true
         }
@@ -244,6 +290,32 @@ class UpvoteCommunity(
         Log.i("Detoks", "Sent reward block to seeding peer")
     }
 
+    private fun sendLastUpvotedVideos(peer: Peer) {
+        logger.debug { "[DETOKS] Received request to sent recommended content" }
+        val upvotedList = SentTokenManager(context).getFiveLatestUpvotedVideos()
+        logger.debug { "[DETOKS] ....and sent $upvotedList back" }
+        val payload = RecommendedVideosPayload(upvotedList)
+
+        val packet = serializePacket(
+            MessageID.RECOMMENDATION_RECEIVED,
+            payload
+        )
+
+        send(peer, packet)
+    }
+    private fun sendOwnLastVideos(peer: Peer) {
+        logger.debug { "[DETOKS] Sending own content back to peer" }
+        val videoList = OwnedTokenManager(context).getLatestThreeUpvotedVideos()
+        logger.debug { "[DETOKS] Received request to sent recommended content and sent $videoList back" }
+        val payload = RecommendedVideosPayload(videoList)
+
+        val packet = serializePacket(
+            MessageID.RECOMMENDATION_RECEIVED,
+            payload
+        )
+
+        send(peer, packet)
+    }
     class Factory(
         private val context: Context,
         private val settings: TrustChainSettings,
