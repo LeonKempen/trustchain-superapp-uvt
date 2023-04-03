@@ -7,6 +7,7 @@ import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_detoks.*
 import mu.KotlinLogging
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.detoks.benchmark.Benchmark
 import nl.tudelft.trustchain.detoks.recommendation.Recommender
 import nl.tudelft.trustchain.detoks.token.ProposalToken
 import nl.tudelft.trustchain.detoks.token.UpvoteToken
@@ -21,6 +22,8 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
     private lateinit var proposalToken: ProposalToken
     private val logger = KotlinLogging.logger {}
     private var previousVideoAdapterIndex = 0
+
+    private var doBenchmark: Boolean = true
 
     private val torrentDir: String
         get() = "${requireActivity().cacheDir.absolutePath}/torrent"
@@ -89,6 +92,7 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             DEFAULT_CACHING_AMOUNT
         )
         Recommender.initialize(torrentManager)
+        Benchmark.initialize(doBenchmark)
 
         upvoteToken = UpvoteToken(-100, "", "", "") //TODO: make constructor with no parameters for initialisation
         proposalToken = ProposalToken()

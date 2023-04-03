@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.detoks
 
+import android.graphics.Point
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -9,10 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.recommendation.Recommender
-import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.token.ProposalToken
+import nl.tudelft.trustchain.detoks.token.UpvoteToken
 import nl.tudelft.trustchain.detoks.trustchain.Balance
+
 
 class VideosAdapter(
     private val torrentManager: TorrentManager,
@@ -63,6 +67,7 @@ class VideosAdapter(
         var tokensSent: TextView
         var tokensReceived: TextView
         var tokensBalance: TextView
+        var peerId: TextView
 
         init {
             mVideoView = itemView.findViewById(R.id.videoView)
@@ -78,16 +83,29 @@ class VideosAdapter(
             tokensSent = itemView.findViewById(R.id.tokensSentValue)
             tokensReceived = itemView.findViewById(R.id.tokensReceivedValue)
             tokensBalance = itemView.findViewById(R.id.tokensBalanceValue)
+            peerId = itemView.findViewById(R.id.ownPeerAddress)
 
             upvoteToken.setLikeListener(itemView, videoID, proposalBlockHash)
             proposalToken.setPostVideoListener(proposalSendButton, itemView, torrentManager)
-            balance.checkTokenBalance(tokensSent, tokensReceived, tokensBalance)
-            balance.dailyBalanceCheckpoint(tokensSent, tokensReceived, tokensBalance)
+            balance.checkTokenBalance(tokensSent, tokensReceived, tokensBalance, peerId)
+            balance.dailyBalanceCheckpoint(tokensSent, tokensReceived, tokensBalance, peerId)
+
+
 
             // TODO: remove this, for testing of Recommender only
             recommendMostLikedButton.setOnClickListener { Recommender.recommendMostLiked() }
             recommendRandomButton.setOnClickListener { Recommender.recommendRandom() }
             recommendMostLikedButton.setOnClickListener { Recommender.requestRecommendations()}
+
+            val location = IntArray(2)
+            proposalSendButton.getLocationOnScreen(location)
+            Log.i("DeToks", "Proposal button X: ${location[0]} Y: ${location[1]}")
+        }
+
+        fun getLocationOnScreen(view: View): Point {
+            val location = IntArray(2)
+            view.getLocationOnScreen(location)
+            return Point(location[0], location[1])
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {

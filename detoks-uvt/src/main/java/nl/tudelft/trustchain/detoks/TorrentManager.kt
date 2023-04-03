@@ -13,6 +13,9 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
+import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.recommendation.Recommender
 import nl.tudelft.trustchain.detoks.util.MagnetUtils
 import java.io.File
@@ -33,6 +36,7 @@ class TorrentManager(
     private val postVideosDir: File,
     private val cachingAmount: Int = 1,
 ) {
+    private val useRecommendation: Boolean = true
     private val sessionManager = SessionManager()
     private val logger = KotlinLogging.logger {}
     private val torrentFiles = mutableListOf<TorrentHandler>()
@@ -67,11 +71,20 @@ class TorrentManager(
         Log.i("DeToks", "Increasing index ... ${(currentIndex + 1) % getNumberOfTorrents()}")
         notifyChange((currentIndex + 1) % getNumberOfTorrents(), loopedToFront = true)
 
-        val recommendedVideo: String? = Recommender.getNextRecommendation()
-        if (recommendedVideo != null) {
-            Log.i("DeToks", "Recommended video ID: $recommendedVideo")
-        } else {
-            Log.i("DeToks", "Could not get recommended video")
+        if (useRecommendation){
+            val recommendedVideo: String? = Recommender.getNextRecommendation()
+            if (recommendedVideo != null) {
+                Log.i("DeToks", "Recommended video ID: $recommendedVideo")
+            } else {
+                Log.i("DeToks", "Could not get recommended video")
+            }
+        }
+
+        val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
+        val peersForService = upvoteCommunity?.network?.getPeersForService("ee6ce7b5ad81eef11f4fcff335229ba169c03aeb")
+        if (peersForService != null) {
+            for (peer: Peer in peersForService)
+                Log.i("DeToks", "Found peer: ${peer.address}")
         }
     }
 

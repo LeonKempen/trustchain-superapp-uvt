@@ -3,6 +3,8 @@ package nl.tudelft.trustchain.detoks.trustchain
 import android.text.format.DateUtils
 import android.util.Log
 import android.widget.TextView
+import nl.tudelft.ipv8.IPv4Address
+import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
@@ -11,7 +13,7 @@ import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
 
 class Balance {
 
-    fun dailyBalanceCheckpoint(tokensSent: TextView, tokensReceived: TextView, tokensBalance: TextView) {
+    fun dailyBalanceCheckpoint(tokensSent: TextView, tokensReceived: TextView, tokensBalance: TextView, peerId: TextView) {
         val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
         val myPublicKey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
         val latestBalanceCheckpoint = upvoteCommunity.database.getLatest(myPublicKey, UpvoteTrustchainConstants.BALANCE_CHECKPOINT)
@@ -40,7 +42,7 @@ class Balance {
             upvoteCommunity.createProposalBlock(UpvoteTrustchainConstants.BALANCE_CHECKPOINT, transaction, myPublicKey)
         } else {
             // get all balances
-            val (sent, received, balance) = checkTokenBalance(tokensSent, tokensReceived, tokensBalance)
+            val (sent, received, balance) = checkTokenBalance(tokensSent, tokensReceived, tokensBalance, peerId)
             val transaction = mapOf(
                 "sent" to sent,
                 "received" to received,
@@ -51,7 +53,7 @@ class Balance {
         }
     }
 
-    fun checkTokenBalance(tokensSent: TextView, tokensReceived: TextView, tokensBalance: TextView):Triple<Int, Int, Int> {
+    fun checkTokenBalance(tokensSent: TextView, tokensReceived: TextView, tokensBalance: TextView, peerId: TextView):Triple<Int, Int, Int> {
         val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()!!
         val allBlocks = upvoteCommunity.database.getBlocksWithType(UpvoteTrustchainConstants.GIVE_UPVOTE_TOKEN)
         var sent = 0;
@@ -67,10 +69,22 @@ class Balance {
                 Log.i("DeToks", "Other type of block found: ${block.blockId}")
             }
         }
+        val numPeers = upvoteCommunity.getPeers().size
+
         Log.i("DeToks", "Tokens sent: $sent received: $received")
+        Log.i("DeToks", "My Peer: ${upvoteCommunity.myPeer.address} LAN: ${upvoteCommunity.myPeer.lanAddress} WAN: ${upvoteCommunity.myPeer.wanAddress}")
+        Log.i("DeToks", "Verified peers: ${upvoteCommunity.network.verifiedPeers.size}")
+        for (peer: Peer in upvoteCommunity.network.verifiedPeers) {
+            Log.i("DeToks", "\tPeer: ${peer.address} LAN: ${peer.lanAddress} WAN: ${peer.wanAddress}")
+        }
+        Log.i("DeToks", "All adresses: ${upvoteCommunity.network.allAddresses.size}")
+        for (address in upvoteCommunity.network.allAddresses) {
+            Log.i("DeToks", "\tPeer: ${address}")
+        }
         tokensSent.text = "$sent"
         tokensReceived.text = "$received"
-        tokensBalance.text = "${received - sent}"
+        tokensBalance.text = "${received - sent} \n#PEERS: $numPeers\nCommunity ID: ${upvoteCommunity.serviceId}"
+        peerId.text = "${upvoteCommunity.myPeer.address}"
         return Triple(sent, received, received-sent)
     }
 }
