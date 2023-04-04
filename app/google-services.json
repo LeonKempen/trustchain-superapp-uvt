@@ -1,34 +1,33 @@
 {
   "project_info": {
-    "project_number": "327016605343",
-    "firebase_url": "https://trustchain-superapp.firebaseio.com",
-    "project_id": "trustchain-superapp",
-    "storage_bucket": "trustchain-superapp.appspot.com"
+    "project_number": "509959657522",
+    "project_id": "detoks-82ade",
+    "storage_bucket": "detoks-82ade.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:327016605343:android:3055eb92f8bea31f5ae4aa",
+        "mobilesdk_app_id": "1:509959657522:android:6ceb051a5dad168c2cc42b",
         "android_client_info": {
           "package_name": "nl.tudelft.trustchain"
         }
       },
       "oauth_client": [
         {
-          "client_id": "327016605343-rkvebn5hatrighvkr3ea8gn0br7d7f9d.apps.googleusercontent.com",
+          "client_id": "509959657522-l0c51ep11vhrog86aflcooorpgr06b1j.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAUq3-O12VR884jokteVn14yiXDeckIxAQ"
+          "current_key": "AIzaSyCUMJ8mafA62o_lBtHt6sPtNMyuBN2h7qc"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "327016605343-rkvebn5hatrighvkr3ea8gn0br7d7f9d.apps.googleusercontent.com",
+              "client_id": "509959657522-l0c51ep11vhrog86aflcooorpgr06b1j.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
