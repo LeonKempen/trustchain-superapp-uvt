@@ -1,34 +1,33 @@
 {
   "project_info": {
-    "project_number": "327016605343",
-    "firebase_url": "https://trustchain-superapp.firebaseio.com",
-    "project_id": "trustchain-superapp",
-    "storage_bucket": "trustchain-superapp.appspot.com"
+    "project_number": "591299656975",
+    "project_id": "trustchain-superapp-uvt",
+    "storage_bucket": "trustchain-superapp-uvt.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:327016605343:android:3055eb92f8bea31f5ae4aa",
+        "mobilesdk_app_id": "1:591299656975:android:dc0434722b348c7eec127a",
         "android_client_info": {
           "package_name": "nl.tudelft.trustchain"
         }
       },
       "oauth_client": [
         {
-          "client_id": "327016605343-rkvebn5hatrighvkr3ea8gn0br7d7f9d.apps.googleusercontent.com",
+          "client_id": "591299656975-0vs1c5idjkthh9ij8a94cg2jeg6iucmr.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAUq3-O12VR884jokteVn14yiXDeckIxAQ"
+          "current_key": "AIzaSyBsslAnjTDN8NMzKW7dKT1uQd3Hy-tWC5c"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "327016605343-rkvebn5hatrighvkr3ea8gn0br7d7f9d.apps.googleusercontent.com",
+              "client_id": "591299656975-0vs1c5idjkthh9ij8a94cg2jeg6iucmr.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

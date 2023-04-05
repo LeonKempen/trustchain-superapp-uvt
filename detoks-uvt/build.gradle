@@ -2,6 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.squareup.sqldelight'
+apply plugin: 'com.google.gms.google-services'
 
 sqldelight {
     Database {
@@ -77,6 +78,8 @@ dependencies {
     implementation 'com.github.tony19:logback-android:2.0.0'
 
     implementation 'com.github.MattSkala:recyclerview-itemadapter:0.4'
+    implementation 'com.google.firebase:firebase-common-ktx:20.3.2'
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.4.5'
 
     // Testing
     testImplementation 'junit:junit:4.12'
@@ -92,6 +95,18 @@ dependencies {
     implementation files('../common/libs/jlibtorrent-android-x86_64-' + jlibtorrent_version + '.jar')
 
     implementation 'com.devbrackets.android:exomedia:4.3.0'
+
+    // Import the Firebase BoM
+    implementation platform('com.google.firebase:firebase-bom:31.4.0')
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    // Add the dependency for the Firebase SDK for Google Analytics
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    // TODO: Add the dependencies for any other Firebase products you want to use
+    // See https://firebase.google.com/docs/android/setup#available-libraries
+    // For example, add the dependencies for Firebase Authentication and Cloud Firestore
+    implementation 'com.google.firebase:firebase-auth-ktx'
+    implementation 'com.google.firebase:firebase-firestore-ktx'
+
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
