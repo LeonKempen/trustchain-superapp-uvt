@@ -19,7 +19,7 @@ dependencies {
     implementation 'com.mpatric:mp3agic:0.9.1'
     implementation 'com.turn:ttorrent-core:1.5'
     implementation "com.squareup.sqldelight:coroutines-extensions:$sqldelight_version"
-    implementation 'org.bitcoinj:bitcoinj-core:0.15.10'
+    implementation 'org.bitcoinj:bitcoinj-core:0.16.2'
 
     implementation files('../common/libs/jlibtorrent-' + jlibtorrent_version + '.jar')
 }

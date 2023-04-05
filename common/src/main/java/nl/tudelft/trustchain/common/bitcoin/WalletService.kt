@@ -89,7 +89,7 @@ class WalletService {
             app.setBlockingStartup(false)
 
             app.startAsync()
-            app.awaitRunning()
+//            app.awaitRunning()
 
             // Store the app-kit in the running wallet store
             walletStore[name] = app
