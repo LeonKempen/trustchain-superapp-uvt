@@ -78,6 +78,35 @@ dependencies {
 
     implementation 'com.github.MattSkala:recyclerview-itemadapter:0.4'
 
+    // Firebase
+    implementation('com.google.firebase:firebase-iid:21.1.0') {
+        exclude group: 'com.google.protobuf', module: 'protobuf-javalite'
+    }
+
+//    implementation 'com.google.firebase:firebase-iid:21.1.0'
+    implementation platform('com.google.firebase:firebase-bom:28.0.1')
+
+    implementation('com.google.firebase:firebase-firestore-ktx') {
+        exclude group: 'com.google.protobuf', module: 'protobuf-javalite'
+        exclude group: 'com.google.protobuf', module: 'protobuf-java'
+        exclude group: 'com.google.protobuf', module: 'protobuf-java'
+        exclude group: 'com.google.firebase', module: 'protolite-well-known-types'
+
+    }
+//    implementation 'com.google.firebase:firebase-common-ktx'
+
+//    configurations {
+//        implementation.exclude module:'proto-google-common-protos'
+//        implementation.exclude module:'protolite-well-known-types'
+//        implementation.exclude module:'protobuf-lite'
+//        implementation.exclude module:'com.google.protobuf:protobuf-java'
+//    }
+//
+//    implementation('com.google.protobuf:protobuf-kotlin:3.17.1') {
+//        exclude group: 'com.google.protobuf', module: 'protobuf-java'
+//        exclude group: 'com.google.protobuf', module: 'protobuf-kotlin'
+//    }
+
     // Testing
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

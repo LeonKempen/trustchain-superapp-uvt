@@ -7,8 +7,6 @@ apply plugin: 'kotlinx-serialization'
 apply plugin: "dagger.hilt.android.plugin"
 apply plugin: "kotlin-kapt"
 apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
-apply plugin: 'com.google.firebase.firebase-perf'
 
 buildscript {
     repositories {
@@ -17,9 +15,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.2'
         classpath("com.google.dagger:hilt-android-gradle-plugin:$hilt_ver")
-
     }
 }
 
@@ -163,10 +159,10 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:2.7.1"
 
     // Firebase
-    implementation 'com.google.firebase:firebase-iid:21.1.0'
-    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.3.6'
-    implementation platform('com.google.firebase:firebase-bom:31.4.0')
-    implementation 'com.google.firebase:firebase-analytics-ktx'
+//    implementation 'com.google.firebase:firebase-iid:21.1.0'
+//    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.3.6'
+//    implementation platform('com.google.firebase:firebase-bom:31.4.0')
+//    implementation 'com.google.firebase:firebase-analytics-ktx'
 
 
     // Material
