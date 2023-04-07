@@ -7,6 +7,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.firestore.ktx.firestore
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
+import nl.tudelft.trustchain.detoks.recommendation.Recommender
 
 class DatabaseConnection {
     private val db: FirebaseFirestore = Firebase.firestore
@@ -15,11 +16,12 @@ class DatabaseConnection {
      * Add a new benchmark result to the Firestore database for keeping track of
      * benchmark performance across different emulators.
      */
-    fun addBenchmarkResult(title: String, runs: Int, startTime: Long, endTime: Long) {
+    fun addBenchmarkResult(title: String, runs: Int, startTime: Long, endTime: Long, timings: Array<Long?>) {
         val upvoteCommunity = IPv8Android.getInstance().getOverlay<UpvoteCommunity>()
         val myPubKey = upvoteCommunity?.myPeer?.publicKey.toString()
         val delta = endTime - startTime
         val timePerRun = delta / runs.toFloat()
+        val maxRecommendations = Recommender.getMaxNumberRecommendations()
         val benchmarkResult = hashMapOf(
             "timestamp" to FieldValue.serverTimestamp(),
             "pub_key" to myPubKey,
@@ -28,7 +30,9 @@ class DatabaseConnection {
             "start_time" to startTime,
             "end_time" to endTime,
             "total_time" to delta,
-            "time_per_run" to timePerRun
+            "time_per_run" to timePerRun,
+            "timings" to timings.asList(),
+            "max_recommends" to maxRecommendations,
         )
 
         db.collection("benchmark_results")

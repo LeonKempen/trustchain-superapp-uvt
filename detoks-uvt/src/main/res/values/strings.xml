@@ -4,4 +4,5 @@
     <string name="proposal_mock_button">Create Proposal Token</string>
     <string name="recommend_most_liked_button">Recommend Most Liked</string>
     <string name="recommend_random_button">Recommend Random</string>
+    <string name="recommend_button">Recommend</string>
 </resources>

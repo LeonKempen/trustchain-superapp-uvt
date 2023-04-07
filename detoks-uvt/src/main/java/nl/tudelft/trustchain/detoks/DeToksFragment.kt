@@ -45,6 +45,9 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
             }
             addFile(torrentDir, BIGBUCKBUNNY, R.raw.big_buck_bunny)
             addFile(torrentDir, LAUNDROMAT, R.raw.cosmos_laundromat)
+            addFile(torrentDir, WIRED_CD, R.raw.wired_cd)
+            addFile(torrentDir, DEFAULT_POST_VIDEO, R.raw.sintel)
+            addFile(torrentDir, DEFAULT_POST_VIDEO2, R.raw.tears_of_steel)
 //            if (!file.exists()) {
 //                val outputStream = FileOutputStream(file)
 //                val ins = requireActivity().resources.openRawResource(R.raw.detoks)
@@ -155,6 +158,8 @@ class DeToksFragment : BaseFragment(R.layout.fragment_detoks) {
         const val DEFAULT_TORRENT_FILE = "detoks.torrent"
         const val LAUNDROMAT = "cosmos_laundromat.torrent"
         const val BIGBUCKBUNNY = "big_buck_bunny.torrent"
+        const val WIRED_CD = "wired_cd.torrent"
+
         const val DEFAULT_POST_VIDEO = "sintel.torrent"
         const val DEFAULT_POST_VIDEO2 = "tears_of_steel.torrent"
 //        const val DEFAULT_POST_VIDEO3 = "arcane.torrent"

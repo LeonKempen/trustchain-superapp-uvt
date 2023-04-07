@@ -1,12 +1,16 @@
 package nl.tudelft.trustchain.detoks.recommendation
 
 import android.util.Log
+import android.widget.Toast
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.trustchain.detoks.TorrentManager
+import nl.tudelft.trustchain.detoks.benchmark.DatabaseConnection
 import nl.tudelft.trustchain.detoks.community.UpvoteCommunity
 import nl.tudelft.trustchain.detoks.community.UpvoteTrustchainConstants
+import org.checkerframework.checker.units.qual.A
 import kotlin.random.Random
+import kotlin.system.measureNanoTime
 
 enum class RecommendationType {
     PEERS, MOST_LIKED, RANDOM
@@ -14,7 +18,7 @@ enum class RecommendationType {
 
 class Recommender {
     companion object {
-        private const val MAX_NUM_RECOMMENDATIONS = 20
+        private var MAX_NUM_RECOMMENDATIONS = 20
         private const val peersWeight: Float = 0.7F
         private const val mostLikedWeight: Float = 0.25F
         private const val randomWeight: Float = 1F - mostLikedWeight - peersWeight
@@ -23,6 +27,7 @@ class Recommender {
         private var mostLikedRecommendations = mutableListOf<String>()
         private var peerRecommendations = mutableListOf<String>()
         private var randomRecommendations = mutableListOf<String>()
+        private var databaseConnection: DatabaseConnection = DatabaseConnection()
 
         /**
          * Initialize the list of recommendations with all the torrents in the TorrentManager
@@ -39,22 +44,39 @@ class Recommender {
             isInitialized = true
         }
 
+        fun getMaxNumberRecommendations(): Int {
+            return MAX_NUM_RECOMMENDATIONS
+        }
+
+        fun setMaxNumberRecommendations(newMax: Int) {
+            MAX_NUM_RECOMMENDATIONS = newMax
+        }
+        fun reset() {
+            recommendations.clear()
+            mostLikedRecommendations.clear()
+            peerRecommendations.clear()
+            randomRecommendations.clear()
+        }
+
         /**
          * Add a new recommendations to the list of recommendations.
          */
         private fun addRecommendation(videoID: String, recommendationType: RecommendationType) {
             when (recommendationType) {
                 RecommendationType.PEERS -> {
-                    if (!peerRecommendations.contains(videoID))
-                        peerRecommendations.add(videoID)
+                    peerRecommendations.add(videoID)
+                    //if (!peerRecommendations.contains(videoID))
+                    //    peerRecommendations.add(videoID)
                 }
                 RecommendationType.MOST_LIKED -> {
-                    if (!mostLikedRecommendations.contains(videoID))
-                        mostLikedRecommendations.add(videoID)
+                    mostLikedRecommendations.add(videoID)
+                    //if (!mostLikedRecommendations.contains(videoID))
+                    //    mostLikedRecommendations.add(videoID)
                 }
                 RecommendationType.RANDOM -> {
-                    if (!randomRecommendations.contains(videoID))
-                        randomRecommendations.add(videoID)
+                    randomRecommendations.add(videoID)
+                    //if (!randomRecommendations.contains(videoID))
+                    //    randomRecommendations.add(videoID)
                 }
             }
 
@@ -99,6 +121,7 @@ class Recommender {
             for (i in 0 until MAX_NUM_RECOMMENDATIONS) {
                 val prob = Random.nextFloat()
                 var newVideoID: String? = null
+
                 if (prob <= peersWeight) {
                     if (peerRecommendations.size > 0)
                         newVideoID = peerRecommendations.removeFirst()
@@ -116,7 +139,7 @@ class Recommender {
                     randomRecommendations.remove(newVideoID)
                 }
             }
-            Log.i("DeToks", "Recommendations: $recommendations")
+            Log.i("DeToksSS", "Recommendations: ${recommendations.size}")
         }
 
         /**
@@ -178,15 +201,32 @@ class Recommender {
 
         //TODO: remove these, for debugging only
         fun recommendMostLiked() {
+            Log.i("DeToks", "Recommending most liked...")
             getMostLikedVideoIDs()
         }
 
         fun recommendRandom() {
+            Log.i("DeToks", "Recommending random...")
             getRandomVideoIDs()
         }
 
         fun requestRecommendations() {
+            Log.i("DeToks", "Recommending upvoted content...")
             requestUpvotedContent()
+        }
+
+        fun recommendNext() {
+            val runs = 100
+            val start = System.currentTimeMillis()
+            var timingList: Array<Long?> = arrayOfNulls(runs)
+            for (i in 1 .. runs) {
+                val runTime = measureNanoTime {
+                    getNextRecommendation()
+                }
+                timingList[i - 1] = runTime
+            }
+            val end = System.currentTimeMillis()
+            databaseConnection.addBenchmarkResult("PEERS: Recommend NEXT", runs, start, end, timingList)
         }
     }
 }

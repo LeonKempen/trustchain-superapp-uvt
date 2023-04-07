@@ -60,8 +60,9 @@ class VideosAdapter(
         var videoPostedOn: TextView
 
         // TODO: remove this, for testing of Recommender only
-        var recommendMostLikedButton: Button
-        var recommendRandomButton: Button
+        var recommendButton: Button
+        //var recommendMostLikedButton: Button
+        //var recommendRandomButton: Button
 
         var proposalSendButton: Button
         var tokensSent: TextView
@@ -76,8 +77,9 @@ class VideosAdapter(
             proposalBlockHash = itemView.findViewById(R.id.proposalBlockHash)
             videoID = itemView.findViewById(R.id.videoID)
             videoPostedOn = itemView.findViewById(R.id.videoPostedOn)
-            recommendMostLikedButton = itemView.findViewById(R.id.recommendMostLiked)
-            recommendRandomButton = itemView.findViewById(R.id.recommendRandom)
+            recommendButton = itemView.findViewById(R.id.recommendButton)
+            //recommendMostLikedButton = itemView.findViewById(R.id.recommendMostLiked)
+            //recommendRandomButton = itemView.findViewById(R.id.recommendRandom)
             proposalSendButton = itemView.findViewById(R.id.proposalMockButton)
             tokensSent = itemView.findViewById(R.id.tokensSentValue)
             tokensReceived = itemView.findViewById(R.id.tokensReceivedValue)
@@ -96,9 +98,17 @@ class VideosAdapter(
                 upvoteCommunity.getContentToSeed()
             }
             // TODO: remove this, for testing of Recommender only
-            recommendMostLikedButton.setOnClickListener { Recommender.recommendMostLiked() }
-            recommendRandomButton.setOnClickListener { Recommender.recommendRandom() }
-            recommendMostLikedButton.setOnClickListener { Recommender.requestRecommendations()}
+            recommendButton.setOnClickListener {
+                Recommender.recommendNext()
+                Toast.makeText(
+                    itemView.context,
+                    "RECOMMEND NEXT DONE",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+//            recommendMostLikedButton.setOnClickListener { Recommender.recommendMostLiked() }
+//            recommendRandomButton.setOnClickListener { Recommender.recommendRandom() }
+//            recommendMostLikedButton.setOnClickListener { Recommender.requestRecommendations()}
         }
 
         fun setVideoData(item: VideoItem, position: Int, onPlaybackError: (() -> Unit)? = null) {

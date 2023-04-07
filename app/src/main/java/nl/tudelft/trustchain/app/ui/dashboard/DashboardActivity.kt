@@ -68,10 +68,10 @@ class DashboardActivity : AppCompatActivity() {
 
         adapter.updateItems((application as TrustChainApplication).appLoader.preferredApps)
 
-        binding.fab.setOnClickListener {
-            val intent = Intent(this, DashboardSelectorActivity::class.java)
-            startActivity(intent)
-        }
+//        binding.fab.setOnClickListener {
+//            val intent = Intent(this, DashboardSelectorActivity::class.java)
+//            startActivity(intent)
+//        }
     }
 
     private fun hasBluetoothPermissions(): Boolean {
