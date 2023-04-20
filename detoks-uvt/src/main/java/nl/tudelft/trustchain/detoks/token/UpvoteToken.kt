@@ -94,7 +94,7 @@ class UpvoteToken constructor(
 
         createToastMessage("reward seeder with this pub key: \n $publicKeySeeder", context)
 
-        val upvoteTokenList = mintTokens(context, proposalBlock.blockId, myPubKey, publicKeySeeder)
+        val upvoteTokenList = mintTokens(context, proposalBlock.blockId, myPubKey, myPubKey)
 
         if (upvoteTokenList.isEmpty()) {
             createToastMessage("Could not mint tokens to upvote the video", context)
